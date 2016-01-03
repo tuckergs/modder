@@ -1,0 +1,34 @@
+<root>
+    
+    <cat name="First 4 bytes">
+        
+        <cat name="First half">
+            
+            <piece name="Byte 1" addr="0" length="1" map="numberNames"/>
+            
+            <piece name="Byte 2" addr="1" length="1" map="numberNames"/>
+            
+        </cat>
+        
+        <cat name="Second half">
+            
+            <piece name="Byte 3" addr="2" length="1" map="numberNames"/>
+            
+            <piece name="Byte 4" addr="3" length="1" map="numberNames"/>
+            
+        </cat>
+        
+    </cat>
+    
+    <map name="numberNames">
+        
+        <item bytes="0C" alias="Twelve!"/>
+        
+        <item bytes="E1" alias="15 squared!"/>
+        
+        <item bytes="39" alias="Fifty seven..."/>
+        
+    </map>
+    
+    
+</root>
