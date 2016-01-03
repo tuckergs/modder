@@ -1,0 +1,91 @@
+
+
+A category file is an XML file that is made up of a few types of nodes...
+
+
+--Categories--
+
+	These organize pieces, kinda like folders.
+
+	Name of the tag
+		cat or category
+
+	Child nodes
+		Can have cat, piece, or map nodes
+		
+	Attributes
+		name
+			Name of the category
+		
+		
+--Pieces--
+
+	These define the pieces of data you modify
+	
+	Name of the tag
+		piece
+		
+	Child nodes
+		Can't have any nodes
+		
+	Attributes
+		name
+			Name of the piece
+		addr
+			Address to modify in the file that this piece deals with
+		length
+			How many bytes this piece modifies
+		type
+			Can be hex, text , or map
+			hex or map
+				This type treat the bytes pointed to by this piece as hex data
+				Both hex and map do the exact same thing
+				This type also allows you to load in a map of data
+				See the map tag for more information
+			text
+				Treats the bytes pointed to by this piece as text data
+				This follows ASCII encoding
+				This hasn't been thoroughly tested yet
+		map
+			The name of the map to use
+			
+			
+--Maps--
+	
+	This allows you to define "alias" to bytes of data
+	
+	Name of the tag
+		map
+		
+	Child nodes
+		Can only have item nodes
+		See items below
+		
+	Attributes
+		name
+			Name of the map
+			
+			
+			
+--Items--
+
+	This defines what alias to give to bytes of data
+	This can only be used in a map
+	
+	Name of the tag
+		item
+		
+	Child nodes
+		Can't have any
+		
+	Attributes
+		bytes
+			The bytes that the alias represents
+		alias
+			The name for those bytes of data
+			
+
+--Remember!--
+	Don't forget a root node! Any name for a root node will do
+			
+		

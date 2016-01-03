@@ -1,7 +1,6 @@
 package main;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
