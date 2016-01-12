@@ -99,7 +99,7 @@ public class Main extends Application{
 		maps = new HashMap < String , HashMap < String , String >>();
 		
 		//Title
-		stOpen.setTitle("Lobby");
+		stOpen.setTitle("Modder Lobby");
 		
 		//Make grid
 		GridPane grid = new GridPane ();
@@ -215,6 +215,9 @@ public class Main extends Application{
 		
 		//New stage
 		Stage newSt = new Stage();
+		
+		//Set title
+		newSt.setTitle("Modder");
 		
 		
 		//Create pane
