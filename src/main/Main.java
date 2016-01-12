@@ -76,6 +76,7 @@ public class Main extends Application{
 	
 	
 	
+	
 	//This map is a map of all input maps -_-
 	/*
 	 * The first string represents the name of a map
@@ -595,8 +596,64 @@ public class Main extends Application{
 		f_byteEditor = new TextArea();
 		f_byteEditor.setPrefColumnCount( 16 );
 		f_byteEditor.setPrefRowCount(2);
+		
+		//Set byte editor text
 		f_byteEditor.setText( curPiece.getValue() );
+		
+		
 		vb_pieceEditor.getChildren().add ( f_byteEditor );
+		
+		//Change the combobox selection when needed
+		f_byteEditor.setOnKeyTyped( event -> {
+			
+			Platform.runLater( new Runnable()
+			{
+				
+				public void run() {
+					
+					HashMap<String, String> m;
+					//Get necessary map
+					m = maps.get(curPiece.getMapName());
+					String key = f_byteEditor.getText();
+					if (m != null && m.containsKey(key)) {
+
+						Platform.runLater(new Runnable() {
+
+							@Override
+							public void run() {
+
+								valueChooserChangeAlreadyHandled = true;
+
+								valueChooser.setValue(m.get(key));
+
+							}
+
+						});
+
+					} else {
+
+						Platform.runLater(new Runnable() {
+
+							@Override
+							public void run() {
+
+								valueChooserChangeAlreadyHandled = true;
+
+								valueChooser.setValue("");
+
+							}
+
+						});
+
+					}
+					
+				}
+				
+			});
+			
+		});
+		
+		
 		
 		//Get map referenced by the piece
 		HashMap < String , String > map_ 
@@ -623,6 +680,14 @@ public class Main extends Application{
 			valueChooser.setDisable(true);
 		valueChooser.setEditable(false);
 		valueChooser.getItems().addAll( map.keySet() );
+		
+		//On start, check if the byte editor is a key in the map
+		if ( map.containsKey(f_byteEditor.getText()) )
+		{
+			
+			valueChooser.setValue(map.get(f_byteEditor.getText()));
+			
+		}
 		
 		//Replace the byte sequences with the name
 		valueChooser.setCellFactory( new Callback<ListView<String>, ListCell<String>>() {

@@ -2,22 +2,10 @@
     
     <cat name="First 4 bytes">
         
-        <cat name="First half">
+        <piece name="First half" addr="0" length="2" map="Two bit"/>        
+
+        <piece name="Second half" addr="2" length="2" map="Two bit"/>
             
-            <piece name="Byte 1" addr="0" length="1" map="numberNames"/>
-            
-            <piece name="Byte 2" addr="1" length="1" map="numberNames"/>
-            
-        </cat>
-        
-        <cat name="Second half">
-            
-            <piece name="Byte 3" addr="2" length="1" map="numberNames"/>
-            
-            <piece name="Byte 4" addr="3" length="1" map="numberNames"/>
-            
-        </cat>
-        
     </cat>
     
     <map name="numberNames">
@@ -27,6 +15,16 @@
         <item bytes="E1" alias="15 squared!"/>
         
         <item bytes="39" alias="Fifty seven..."/>
+        
+    </map>
+    
+    <map name="Two bit">
+        
+        <item bytes="000C" alias="Twelve!"/>
+        
+        <item bytes="00F9" alias="Mega Rush"/>
+        
+        <item bytes="0102" alias="Right On!"/>
         
     </map>
     
