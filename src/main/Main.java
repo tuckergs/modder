@@ -45,34 +45,44 @@ public class Main extends Application{
 	public static Category rootCategory;
 	public static Category curCategory;
 	
-	public static Piece curPiece;
+	//public static Piece curPiece;
+	
+	
+	private class ModifyPieceWindow{
+		
+		public ModifyPieceWindow(Piece p) {
+			piece = p;
+		}
+		public Stage stage;
+		public Piece piece;
+		public Label l_pieceName;
+		public TextArea f_byteEditor;
+		public ComboBox<String> valueChooser;
+		public Button btn_modifyPiece;
+		public VBox vb_pieceEditor;
+		
+		//This is to prevent an infinite loop in a combobox's set on action
+		public boolean valueChooserChangeAlreadyHandled = false;
+		
+	}
 	
 	
 	//Main stage UI elements
 	private VBox vb_categoryBrowser;
-	private VBox vb_pieceEditor;
+	//private VBox vb_pieceEditor;
 	
 	//For category browser
 	private TextField f_UCI;
 	private TextArea f_categories;
 	private TextField f_browserInput;
 	
-	//Save button
-	
-	
-	//For piece editor
-	private Label l_pieceName;
-	private TextArea f_byteEditor;
-	private ComboBox<String> valueChooser;
-	private Button btn_modifyPiece;
 	private Button btn_saveFile;
-	
+	private Button btn_saveAs;
 
 	//For detection of newline in browser input
 	private boolean keyDownInBrowserInput;
 	
-	//This is to prevent an infinite loop in a combobox's set on action
-	private boolean valueChooserChangeAlreadyHandled = false;
+
 	
 	
 	
@@ -228,7 +238,7 @@ public class Main extends Application{
 		//Create category browser box
 		vb_categoryBrowser = new VBox ( 12 );
 		
-		//Create UCI field
+		//Create UCI field (UCI stands for Universal Category Identifier
 		f_UCI = new TextField ();
 		f_UCI.setEditable( false );
 		f_UCI.setText(":");
@@ -265,10 +275,10 @@ public class Main extends Application{
 		
 		
 		//Initialize piece editor
-		vb_pieceEditor = new VBox ( 12 );
+		VBox vb = new VBox ( 12 );
 		
 		//Add to pane
-		pane.setRight(vb_pieceEditor);
+		pane.setRight(vb);
 		
 		//Add scene
 		Scene scene =  new Scene ( pane , 600 , 300 );
@@ -325,18 +335,18 @@ public class Main extends Application{
 		
 	}
 	
-	private void addModifyButtonLogic()
+	private void addModifyButtonLogic(ModifyPieceWindow wn)
 	{
 		
-		btn_modifyPiece.setOnAction( event -> {
+		wn.btn_modifyPiece.setOnAction( event -> {
 
 
 			try {
 				
-				if ( curPiece.getDataType() == PieceDataType.TEXT )
-					curPiece.setValue( HexStuff.textStringToHexString( f_byteEditor.getText() ) );
+				if ( wn.piece.getDataType() == PieceDataType.TEXT )
+					wn.piece.setValue( HexStuff.textStringToHexString( wn.f_byteEditor.getText() ) );
 				else
-					curPiece.setValue( f_byteEditor.getText() );
+					wn.piece.setValue( wn.f_byteEditor.getText() );
 			
 			} catch (Exception e) {
 				
@@ -489,7 +499,7 @@ public class Main extends Application{
 			else
 			{
 				
-				changeViewedPiece ( curCategory.getPiece(query) );
+				makeModifyPieceWindow ( curCategory.getPiece(query) );
 				
 			}
 			
@@ -584,12 +594,15 @@ public class Main extends Application{
 	}
 	
 	
-	private void makeHexInput() throws Exception
+	
+	
+	
+	private void makeTextInput() throws Exception
 	{
 		
-		//Remove all things in the VBox
+		/*//Remove all things in the VBox
 		vb_pieceEditor.getChildren().clear();
-
+		
 		
 		//Create label
 		l_pieceName = new Label( curPiece.getName() );
@@ -598,102 +611,166 @@ public class Main extends Application{
 		//Create byte editor field
 		f_byteEditor = new TextArea();
 		f_byteEditor.setPrefColumnCount( 16 );
-		f_byteEditor.setPrefRowCount(2);
-		
-		//Set byte editor text
-		f_byteEditor.setText( curPiece.getValue() );
-		
-		
+		f_byteEditor.setPrefRowCount(16);
+		f_byteEditor.setText( HexStuff.hexStringtoTextString( curPiece.getValue() ) );
 		vb_pieceEditor.getChildren().add ( f_byteEditor );
 		
-		//Change the combobox selection when needed
-		f_byteEditor.setOnKeyTyped( event -> {
+		
+		//Create modify button
+		createModifyButton(wn);
+		
+		
+		//Unhide save button
+		btn_saveFile.setVisible(true);*/
+		
+	}
+	
+	private void createModifyButton (ModifyPieceWindow wn) throws Exception
+	{
+		
+		//Create modify button
+		wn.btn_modifyPiece = new Button ( "Modify piece" );
+		addModifyButtonLogic (wn);
+		wn.vb_pieceEditor.getChildren().add( wn.btn_modifyPiece );
+		
+	}
+	
+	
+	
+	private void changeCurrentCategory( Category newCat )
+	{
+		
+		curCategory = newCat;
+		
+		f_UCI.setText( getUCI ( curCategory ) );
+		
+		updateCategoriesField();
+		
+	}
+	
+	
+	
+	
+
+
+	private ModifyPieceWindow makeModifyPieceWindow(Piece p) throws Exception
+	{
+
+		ModifyPieceWindow wn = new ModifyPieceWindow(p);
+		
+		PieceDataType datatype = p.getDataType();
+		
+		if ( datatype == PieceDataType.HEX || datatype == PieceDataType.MAP )
+		{
 			
+			makeHexInput(wn);
+			
+		}
+		else
+		{
+			
+			//makeTextInput (wn);
+			throw new Exception("Text boxes aren't implemented yet");
+			
+		}
+		
+		return wn;
+
+	}
+	
+	private void makeHexInput(ModifyPieceWindow wn) throws Exception
+	{
+		
+		wn.stage = new Stage();
+		wn.stage.setTitle("Modify piece...");
+		
+		wn.vb_pieceEditor = new VBox(12);
+
+		//Create label
+		wn.l_pieceName = new Label( getUCI(curCategory) + wn.piece.getName() );
+		wn.vb_pieceEditor.getChildren().add( wn.l_pieceName );
+
+		//Create byte editor field
+		wn.f_byteEditor = new TextArea();
+		wn.f_byteEditor.setPrefColumnCount( 16 );
+		wn.f_byteEditor.setPrefRowCount(2);
+
+		//Set byte editor text
+		wn.f_byteEditor.setText( wn.piece.getValue() );
+
+
+		wn.vb_pieceEditor.getChildren().add ( wn.f_byteEditor );
+
+		//Change the combobox selection when needed
+		wn.f_byteEditor.setOnKeyTyped( event -> {
+
 			Platform.runLater( new Runnable()
 			{
-				
+
 				public void run() {
-					
+
 					HashMap<String, String> m;
 					//Get necessary map
-					m = maps.get(curPiece.getMapName());
-					String key = f_byteEditor.getText();
+					m = maps.get(wn.piece.getMapName());
+					String key = wn.f_byteEditor.getText();
+
 					if (m != null && m.containsKey(key)) {
-
 						Platform.runLater(new Runnable() {
-
 							@Override
 							public void run() {
-
-								valueChooserChangeAlreadyHandled = true;
-
-								valueChooser.setValue(m.get(key));
-
+								wn.valueChooserChangeAlreadyHandled = true;
+								wn.valueChooser.setValue(m.get(key));
 							}
-
 						});
-
 					} else {
-
 						Platform.runLater(new Runnable() {
-
 							@Override
 							public void run() {
-
-								valueChooserChangeAlreadyHandled = true;
-
-								valueChooser.setValue("");
-
+								wn.valueChooserChangeAlreadyHandled = true;
+								wn.valueChooser.setValue("");
 							}
-
 						});
-
-					}
-					
+					}	
 				}
-				
 			});
-			
 		});
-		
-		
-		
+
+
+
 		//Get map referenced by the piece
 		HashMap < String , String > map_ 
-					= maps.get	( 
-											curPiece.getMapName() 
-										);
-		
+		= maps.get	(wn.piece.getMapName());
+
 		boolean noMap = false;
-		
+
 		if (map_ == null )
 			noMap = true;
-		
+
 		final HashMap < String , String > map;
-		
+
 		if ( noMap )
 			map = new HashMap < String , String >();
 		else
 			map = map_;
-		
-		
+
+
 		//Create value chooser
-		valueChooser = new ComboBox<String> ();
+		wn.valueChooser = new ComboBox<String> ();
 		if ( noMap ) 
-			valueChooser.setDisable(true);
-		valueChooser.setEditable(false);
-		valueChooser.getItems().addAll( map.keySet() );
-		
+			wn.valueChooser.setDisable(true);
+		wn.valueChooser.setEditable(false);
+		wn.valueChooser.getItems().addAll( map.keySet() );
+
 		//On start, check if the byte editor is a key in the map
-		if ( map.containsKey(f_byteEditor.getText()) )
+		if ( map.containsKey(wn.f_byteEditor.getText()) )
 		{
-			
-			valueChooser.setValue(map.get(f_byteEditor.getText()));
-			
+
+			wn.valueChooser.setValue(map.get(wn.f_byteEditor.getText()));
+
 		}
-		
+
 		//Replace the byte sequences with the name
-		valueChooser.setCellFactory( new Callback<ListView<String>, ListCell<String>>() {
+		wn.valueChooser.setCellFactory( new Callback<ListView<String>, ListCell<String>>() {
 
 			@Override 
 			public ListCell<String> call(ListView<String> param) {
@@ -720,132 +797,51 @@ public class Main extends Application{
 			}
 
 		});
-		
-		valueChooser.setOnAction( event -> {
-			
+
+		wn.valueChooser.setOnAction( event -> {
+
 			//This is to prevent an infinite loop caused by setValue
-			if ( !valueChooserChangeAlreadyHandled ) {
-				
-				valueChooserChangeAlreadyHandled = true;
-				f_byteEditor.setText(valueChooser.getValue());
-				
+			if ( !wn.valueChooserChangeAlreadyHandled ) {
+
+				wn.valueChooserChangeAlreadyHandled = true;
+				wn.f_byteEditor.setText(wn.valueChooser.getValue());
+
 				//Change select text
-				HashMap<String, String> m = maps.get(
-																			curPiece.getMapName()
-																				);
+				HashMap<String, String> m = maps.get(wn.piece.getMapName());
 				if (m != null)
 				{
-					
 					Platform.runLater( new Runnable (){
-
 						@Override
 						public void run() {
-
-							valueChooser.setValue(m.get(valueChooser.getValue()));
-							
+							wn.valueChooser.setValue(m.get(wn.valueChooser.getValue()));
 						}
-						
 					});
-					
-				
 				}
-					
 			}
 			else
 			{
-				
-				valueChooserChangeAlreadyHandled = false;
-				
+
+				wn.valueChooserChangeAlreadyHandled = false;
+
 			}
-			
+
 		});
-		
-	
-		vb_pieceEditor.getChildren().add(valueChooser);
-		
-		
+
+
+		wn.vb_pieceEditor.getChildren().add(wn.valueChooser);
+
+
 		//Create modify button
-		createModifyButton();
-		
+		createModifyButton(wn);
+
 		//Unhide save button
 		btn_saveFile.setVisible(true);
 		
+		Scene scene =  new Scene ( wn.vb_pieceEditor );
+		wn.stage.setScene(scene);
 		
-		
-	}
-	
-	private void makeTextInput() throws Exception
-	{
-		
-		//Remove all things in the VBox
-		vb_pieceEditor.getChildren().clear();
-		
-		
-		//Create label
-		l_pieceName = new Label( curPiece.getName() );
-		vb_pieceEditor.getChildren().add( l_pieceName );
-		
-		//Create byte editor field
-		f_byteEditor = new TextArea();
-		f_byteEditor.setPrefColumnCount( 16 );
-		f_byteEditor.setPrefRowCount(16);
-		f_byteEditor.setText( HexStuff.hexStringtoTextString( curPiece.getValue() ) );
-		vb_pieceEditor.getChildren().add ( f_byteEditor );
-		
-		
-		//Create modify button
-		createModifyButton();
-		
-		
-		//Unhide save button
-		btn_saveFile.setVisible(true);
+		wn.stage.show();
 		
 	}
-	
-	private void createModifyButton () throws Exception
-	{
-		
-		//Create modify button
-		btn_modifyPiece = new Button ( "Modify piece" );
-		addModifyButtonLogic ();
-		vb_pieceEditor.getChildren().add( btn_modifyPiece );
-		
-	}
-	
-	
-	
-	private void changeCurrentCategory( Category newCat )
-	{
-		
-		curCategory = newCat;
-		
-		f_UCI.setText( getUCI ( curCategory ) );
-		
-		updateCategoriesField();
-		
-	}
-	
-	private void changeViewedPiece ( Piece newPiece ) throws Exception
-	{
-		
-		curPiece = newPiece;
-		
-		PieceDataType datatype = newPiece.getDataType();
-		
-		if ( datatype == PieceDataType.HEX || datatype == PieceDataType.MAP )
-		{
-			
-			makeHexInput();
-			
-		}
-		else
-		{
-			
-			makeTextInput ();
-			
-		}
-		
-	}
-	
-	
+
 }

@@ -1,0 +1,10 @@
+
+
+-Make the piece modification area pop up in a separate window
+-Print out log of changes
+--Development (for knowing what has been changed)
+--Raw (for patching purposes)
+-Make patching program
+
+-Create save as
+-Tab completion
